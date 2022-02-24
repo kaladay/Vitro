@@ -1,7 +1,6 @@
 package edu.cornell.mannlib.vitro.webapp.dynapi;
 
 import static edu.cornell.mannlib.vitro.webapp.modelaccess.ModelNames.FULL_UNION;
-import static org.junit.Assert.assertFalse;
 
 import java.io.File;
 import java.io.IOException;

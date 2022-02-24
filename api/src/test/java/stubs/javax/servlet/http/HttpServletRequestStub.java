@@ -51,6 +51,7 @@ public class HttpServletRequestStub implements HttpServletRequest {
 	private String remoteAddr = "127.0.0.1";
 
 	private HttpSession session;
+	private ServletContext servletContext;
 	private final Map<String, List<String>> parameters;
 	private final Map<String, Object> attributes;
 	private final Map<String, List<String>> headers;
@@ -139,6 +140,10 @@ public class HttpServletRequestStub implements HttpServletRequest {
 			headers.put(name, new ArrayList<String>());
 		}
 		headers.get(name).add(value);
+	}
+
+	public void setServletContext(ServletContext servletContext) {
+		this.servletContext = servletContext;
 	}
 
 	public void addParameter(String name, String value) {
@@ -475,7 +480,7 @@ public class HttpServletRequestStub implements HttpServletRequest {
 
 	@Override
 	public ServletContext getServletContext() {
-		return null;
+		return servletContext;
 	}
 
 	@Override

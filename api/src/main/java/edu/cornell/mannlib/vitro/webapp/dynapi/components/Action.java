@@ -1,5 +1,10 @@
 package edu.cornell.mannlib.vitro.webapp.dynapi.components;
 
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
@@ -7,11 +12,6 @@ import org.apache.commons.logging.LogFactory;
 
 import edu.cornell.mannlib.vitro.webapp.dynapi.OperationData;
 import edu.cornell.mannlib.vitro.webapp.utils.configuration.Property;
-
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 public class Action implements RunnableComponent, Poolable {
 
@@ -33,7 +33,7 @@ public class Action implements RunnableComponent, Poolable {
 	}
 
 	public OperationResult run(OperationData input) {
-		if (firstStep == null) {
+		if (firstStep == null || rpcMethodUnsupported(input.getMethod())) {
 			return new OperationResult(HttpServletResponse.SC_NOT_IMPLEMENTED);
 		}
 		return firstStep.run(input);
@@ -72,20 +72,28 @@ public class Action implements RunnableComponent, Poolable {
 	@Override
 	public void removeDeadClients() {
 		Map<Long, Boolean> currentThreadIds = Thread
-				.getAllStackTraces()
-				.keySet()
-				.stream()
-				.collect(Collectors.toMap(Thread::getId, Thread::isAlive));
+			.getAllStackTraces()
+			.keySet()
+			.stream()
+			.collect(Collectors.toMap(Thread::getId, Thread::isAlive));
 		for (Long client : clients) {
 			if (!currentThreadIds.containsKey(client) || currentThreadIds.get(client) == false) {
 				clients.remove(client);
-			} 
+			}
 		}
 	}
 
 	@Override
 	public boolean hasClients() {
 		return !clients.isEmpty();
+	}
+
+	private boolean rpcMethodUnsupported(String method) {
+		if (rpc == null || rpc.getHttpMethod() == null || rpc.getHttpMethod().getName() == null) {
+			return false;
+		}
+
+		return rpc.getHttpMethod().getName().equalsIgnoreCase(method);
 	}
 
 }
